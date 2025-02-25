@@ -24,7 +24,7 @@ class PermissionRolePage extends Page
 
     protected static ?string $navigationIcon = 'heroicon-o-key';
 
-    protected static string $view = 'acl-plugin::filament.pages.permission-role-page';
+    protected static string $view = 'filament.pages.permission-role-page';
 
     public static function getRoutePath(): string
     {
@@ -46,12 +46,17 @@ class PermissionRolePage extends Page
         return static::getNavigationLabel();
     }
 
+    public static function shouldRegisterNavigation(): bool
+    {
+        return auth()->user()->hasPermissionTo('update roles');
+    }
+
     public function mount(): void
     {
+        auth()->user()->hasPermissionTo('update roles') || abort(403);
         $this->roles = Role::all();
         $this->permissions = Permission::all();
 
-        // Utiliza mapWithKeys para construir um array associativo com as permissões de cada role
         $this->permissionsByRole = $this->roles->mapWithKeys(function (Role $role) {
             return [$role->id => $role->permissions->pluck('id')->toArray()];
         })->toArray();
@@ -79,6 +84,6 @@ class PermissionRolePage extends Page
             ->success()
             ->send();
 
-        session()->flash('success', __('Permissões atualizadas com sucesso!'));
+        session()->flash('success', __('Permissions updated successfully!'));
     }
 }
