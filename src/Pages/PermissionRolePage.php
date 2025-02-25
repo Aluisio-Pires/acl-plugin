@@ -24,7 +24,7 @@ class PermissionRolePage extends Page
 
     protected static ?string $navigationIcon = 'heroicon-o-key';
 
-    protected static string $view = 'filament.pages.permission-role-page';
+    protected static string $view = 'acl-plugin::pages.permission-role-page';
 
     public static function getRoutePath(): string
     {
@@ -41,19 +41,18 @@ class PermissionRolePage extends Page
         return __('Access Control Panel');
     }
 
-    public function getTitle(): string|Htmlable
+    public function getTitle(): string | Htmlable
     {
         return static::getNavigationLabel();
     }
 
-    public static function shouldRegisterNavigation(): bool
+    public static function canAccess(): bool
     {
         return auth()->user()->hasPermissionTo('update roles');
     }
 
     public function mount(): void
     {
-        auth()->user()->hasPermissionTo('update roles') || abort(403);
         $this->roles = Role::all();
         $this->permissions = Permission::all();
 
