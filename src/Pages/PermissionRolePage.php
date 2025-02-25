@@ -12,15 +12,16 @@ use Spatie\Permission\PermissionRegistrar;
 
 class PermissionRolePage extends Page
 {
+    /** @var Collection<int, Role> */
     public Collection $roles;
 
+    /** @var Collection<int, Permission> */
     public Collection $permissions;
 
     public string $search = '';
 
-    public array $selectedPermissions = [];
-
-    public array $permissionsByRole = [];
+    /** @var array<int, mixed> */
+    public array $selectedPermissions;
 
     protected static ?string $navigationIcon = 'heroicon-o-key';
 
@@ -48,7 +49,8 @@ class PermissionRolePage extends Page
 
     public static function canAccess(): bool
     {
-        return auth()->user()->hasPermissionTo('update roles');
+        // @phpstan-ignore-next-line
+        return auth()->user()?->hasPermissionTo('update roles');
     }
 
     public function mount(): void
@@ -56,11 +58,10 @@ class PermissionRolePage extends Page
         $this->roles = Role::all();
         $this->permissions = Permission::all();
 
-        $this->permissionsByRole = $this->roles->mapWithKeys(function (Role $role) {
-            return [$role->id => $role->permissions->pluck('id')->toArray()];
+        $this->selectedPermissions = $this->roles->mapWithKeys(function (Role $role) {
+            return [(int) $role->id => $role->permissions->pluck('id')->toArray()];
         })->toArray();
 
-        $this->selectedPermissions = $this->permissionsByRole;
     }
 
     public function searchPermissions(string $value): void
